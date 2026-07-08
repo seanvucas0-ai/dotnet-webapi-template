@@ -28,3 +28,9 @@ jobs:
           echo "Service Name: ${{ github.event.inputs.service_name }}"
           echo "Description: ${{ github.event.inputs.description }}"
           echo "Team: ${{ github.event.inputs.team_name }}"
+
+- name: Replace values
+  run: |
+    sed -i "s/{{SERVICE_NAME}}/${{ github.event.inputs.service_name }}/g" README.md
+    sed -i "s/{{DESCRIPTION}}/${{ github.event.inputs.description }}/g" README.md
+    sed -i "s/{{TEAM_NAME}}/${{ github.event.inputs.team_name }}/g" README.md
