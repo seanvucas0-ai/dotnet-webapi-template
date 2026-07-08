@@ -2,9 +2,28 @@ name: Create Service
 
 on:
   workflow_dispatch:
+    inputs:
+      service_name:
+        description: Service Name
+        required: true
+        type: string
+
+      description:
+        description: Service Description
+        required: true
+        type: string
+
+      team_name:
+        description: Team Name
+        required: true
+        type: string
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "Hello"
+      - run: |
+          echo "Service Name: ${{ github.event.inputs.service_name }}"
+          echo "Description: ${{ github.event.inputs.description }}"
+          echo "Team Name: ${{ github.event.inputs.team_name }}"
