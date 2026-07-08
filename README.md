@@ -1,9 +1,9 @@
-# c
+# customer-api
 
 ## Description
 
-a
+Customer management API
 
 ## Team
 
-Owned by t
+Owned by Customer Platforms
