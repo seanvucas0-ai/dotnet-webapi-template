@@ -4,12 +4,9 @@ dotnet-webapi-template
 │   └── workflows
 │       ├── build.yml
 │       └── create-service.yml
-│
-├── Controllers
-│
+|
 ├── Program.cs
 ├── TemplateApi.csproj
 ├── appsettings.json
 ├── README.md
-│
 └── SampleController.cs
