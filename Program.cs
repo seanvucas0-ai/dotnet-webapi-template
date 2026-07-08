@@ -4,6 +4,8 @@ builder.Logging.AddConsole();
 // Controllers
 builder.Services.AddControllers();
 
+builder.Services.AddApiVersioning();
+
 // Health Checks
 builder.Services.AddHealthChecks();
 
