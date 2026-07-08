@@ -1,21 +1,15 @@
 dotnet-webapi-template
 │
-├── src
-│   └── TemplateApi
-│       ├── Controllers
-│       │   └── SampleController.cs
-│       ├── Models
-│       ├── Services
-│       ├── HealthChecks
-│       ├── Program.cs
-│       └── TemplateApi.csproj
+├── .github
+│   └── workflows
+│       ├── build.yml
+│       └── create-service.yml
 │
-├── tests
-│   └── TemplateApi.Tests
-│       └── TemplateApi.Tests.csproj
+├── Controllers
 │
+├── Program.cs
+├── TemplateApi.csproj
+├── appsettings.json
 ├── README.md
 │
-└── .github
-    └── workflows
-        └── build.yml
+└── SampleController.cs
