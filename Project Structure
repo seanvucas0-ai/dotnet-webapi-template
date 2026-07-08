@@ -1,0 +1,17 @@
+dotnet-webapi-template
+│
+├─ src
+│  └─ ServiceName
+│      ├─ Controllers
+│      ├─ Models
+│      ├─ Services
+│      ├─ HealthChecks
+│      ├─ Program.cs
+│      └─ ServiceName.csproj
+│
+├─ tests
+│
+├─ README.md
+│
+└─ .github
+    └─ workflows
