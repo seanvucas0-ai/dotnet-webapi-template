@@ -1,4 +1,9 @@
 # customer-api
 
-Description: Customer management API
-Owner: Customer Platforms
+## Description
+
+Customer management API
+
+## Team
+
+Owned by Customer Platforms
