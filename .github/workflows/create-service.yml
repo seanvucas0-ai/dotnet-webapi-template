@@ -22,19 +22,11 @@ on:
         required: true
         type: string
 
-jobs:
-  create_repo:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Create repository from template
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.rest.repos.createUsingTemplate({
-              template_owner: 'seanvucas0-ai',
-              template_repo: 'dotnet-webapi-template',
-              owner: 'seanvucas0-ai',
-              name: '${{ github.event.inputs.service_name }}'
+- name: Test authentication
+  uses: actions/github-script@v7
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    script: |
+      const user = await github.rest.users.getAuthenticated();
+      console.log(user.data.login);
             });
