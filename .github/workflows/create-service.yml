@@ -1,1 +1,16 @@
+name: Create Service
 
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        required: true
+        type: string
+
+      description:
+        required: true
+        type: string
+
+      team_name:
+        required: true
+        type: string
