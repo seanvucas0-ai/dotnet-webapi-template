@@ -27,10 +27,17 @@ jobs:
 
       - name: Update README
         run: |
-          echo "# ${{ github.event.inputs.service_name }}" > README.md
-          echo "" >> README.md
-          echo "Description: ${{ github.event.inputs.description }}" >> README.md
-          echo "Owner: ${{ github.event.inputs.team_name }}" >> README.md
+          cat << EOF > README.md
+          # ${{ github.event.inputs.service_name }}
+
+          ## Description
+
+          ${{ github.event.inputs.description }}
+
+          ## Team
+
+          Owned by ${{ github.event.inputs.team_name }}
+          EOF
 
       - name: Commit Changes
         run: |
