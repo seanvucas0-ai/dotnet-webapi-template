@@ -5,19 +5,21 @@ permissions:
   actions: write
   administration: write
 
-
 on:
   workflow_dispatch:
     inputs:
       service_name:
+        description: Service Name
         required: true
         type: string
 
       description:
+        description: Service Description
         required: true
         type: string
 
       team_name:
+        description: Team Name
         required: true
         type: string
 
@@ -26,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Create repository from template
         uses: actions/github-script@v7
         with:
