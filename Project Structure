@@ -12,6 +12,7 @@ dotnet-webapi-template
 │
 ├── tests
 │   └── TemplateApi.Tests
+│       └── TemplateApi.Tests.csproj
 │
 ├── README.md
 │
