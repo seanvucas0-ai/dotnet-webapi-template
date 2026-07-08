@@ -19,16 +19,16 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore src/TemplateApi/TemplateApi.csproj
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build src/TemplateApi/TemplateApi.csproj --no-restore
 
       - name: Test
         run: dotnet test --no-build
 
       - name: Publish
-        run: dotnet publish -c Release -o publish
+        run: dotnet publish src/TemplateApi/TemplateApi.csproj -c Release -o publish
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
