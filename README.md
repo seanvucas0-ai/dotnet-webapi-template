@@ -1,9 +1,9 @@
-# customer-api
+# {{SERVICE_NAME}}
 
 ## Description
 
-Customer management API
+{{DESCRIPTION}}
 
 ## Team
 
-Owned by Customer Platforms
+Owned by {{TEAM_NAME}}
