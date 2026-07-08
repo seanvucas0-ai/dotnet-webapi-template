@@ -4,27 +4,31 @@ on:
   workflow_dispatch:
     inputs:
       service_name:
-        description: Service Name
         required: true
         type: string
 
       description:
-        description: Service Description
         required: true
         type: string
 
       team_name:
-        description: Team Name
         required: true
         type: string
 
 jobs:
-  test:
+  create_repo:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Display Inputs
-        run: |
-          echo "Service Name: ${{ github.event.inputs.service_name }}"
-          echo "Description: ${{ github.event.inputs.description }}"
-          echo "Team: ${{ github.event.inputs.team_name }}"
+
+      - name: Create repository from template
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createUsingTemplate({
+              template_owner: 'seanvucas0-ai',
+              template_repo: 'dotnet-webapi-template',
+              owner: 'seanvucas0-ai',
+              name: '${{ github.event.inputs.service_name }}'
+            });
