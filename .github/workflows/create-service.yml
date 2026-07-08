@@ -1,32 +1,10 @@
 name: Create Service
 
-permissions:
-  contents: write
-  actions: write
-
 on:
   workflow_dispatch:
-    inputs:
-      service_name:
-        description: Service Name
-        required: true
-        type: string
 
-      description:
-        description: Service Description
-        required: true
-        type: string
-
-      team_name:
-        description: Team Name
-        required: true
-        type: string
-
-- name: Test authentication
-  uses: actions/github-script@v7
-  with:
-    github-token: ${{ secrets.GITHUB_TOKEN }}
-    script: |
-      const user = await github.rest.users.getAuthenticated();
-      console.log(user.data.login);
-            });
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello"
