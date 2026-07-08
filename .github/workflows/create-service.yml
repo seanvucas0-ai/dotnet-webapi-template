@@ -1,5 +1,11 @@
 name: Create Service
 
+permissions:
+  contents: write
+  actions: write
+  administration: write
+
+
 on:
   workflow_dispatch:
     inputs:
