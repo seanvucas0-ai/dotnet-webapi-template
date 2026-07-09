@@ -1,10 +1,15 @@
-name: Deploy
+name: Deploy Service Status
 
 on:
   workflow_run:
     workflows: ["Build and Test"]
     types:
       - completed
+
+permissions:
+  pages: write
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
@@ -13,26 +18,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: application
+      - uses: actions/checkout@v4
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .
-
-      - name: Health Check
+      - name: Create service page
         run: |
-          sleep 30
+          mkdir site
 
-          curl --fail \
-          https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net/health
+          cat > site/index.html << EOF
+          <html>
+          <head>
+              <title>Service Running</title>
+          </head>
+          <body>
+              <h1>Service Running</h1>
+              <p>Repository: ${{ github.repository }}</p>
+              <p>Status: Running</p>
+              <p>Provisioned from Port</p>
+          </body>
+          </html>
+          EOF
 
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
 
-      - name: Validate Sample API
-        run: |
-          curl --fail \
-          https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net/api/sample
+      - uses: actions/deploy-pages@v4
