@@ -55,13 +55,23 @@ jobs:
           ## Team
 
           Owned by ${{ github.event.inputs.team_name }}
+          
           EOF
-
-      - name: Commit changes
-        run: |
+          
+          - name: Replace appsettings values
+          run: |
+          sed -i "s/{{SERVICE_NAME}}/${{ github.event.inputs.service_name }}/g" appsettings.json
+      
+          sed -i "s/{{TEAM_NAME}}/${{ github.event.inputs.team_name }}/g" appsettings.json
+      
+            - name: Commit changes
+              run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
           git add README.md
           git commit -m "Populate template values" || exit 0
           git push
+          - name: Register Entity in Port
+            run: |
+              curl -X POST https://api.getport.io/v1/blueprints/service/entities
