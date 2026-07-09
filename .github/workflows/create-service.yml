@@ -21,8 +21,8 @@ jobs:
 
     steps:
       - name: Create repository from template
-        uses: actions/github-script@v7
         id: create_repo
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
@@ -55,52 +55,51 @@ jobs:
           ## Team
 
           Owned by ${{ github.event.inputs.team_name }}
-          
           EOF
-          
-          - name: Replace appsettings values
-          run: |
+
+      - name: Replace appsettings values
+        run: |
           sed -i "s/{{SERVICE_NAME}}/${{ github.event.inputs.service_name }}/g" appsettings.json
-      
           sed -i "s/{{TEAM_NAME}}/${{ github.event.inputs.team_name }}/g" appsettings.json
-      
-            - name: Commit changes
-              run: |
+
+      - name: Commit changes
+        run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git add README.md
-          git commit -m "Populate template values" || exit 0
-          git push'
+          git add README.md appsettings.json
 
-          - name: Create Port Entity
-            env:
-              PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
-              PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
-            run: |
-          
-              ACCESS_TOKEN=$(curl -s --location --request POST \
-                'https://api.port.io/v1/auth/access_token' \
-                --header 'Content-Type: application/json' \
-                --data-raw "{
-                  \"clientId\": \"$PORT_CLIENT_ID\",
-                  \"clientSecret\": \"$PORT_CLIENT_SECRET\"
-                }" | jq -r '.accessToken')
-          
-              curl --location --request POST \
-                "https://api.port.io/v1/blueprints/service_1/entities?upsert=true" \
-                --header "Authorization: Bearer $ACCESS_TOKEN" \
-                --header "Content-Type: application/json" \
-                --data-raw "{
-                  \"identifier\": \"${{ github.event.inputs.service_name }}\",
-                  \"title\": \"${{ github.event.inputs.service_name }}\",
-                  \"properties\": {
-                    \"service_name\": \"${{ github.event.inputs.service_name }}\",
-                    \"description\": \"${{ github.event.inputs.description }}\",
-                    \"team_name\": \"${{ github.event.inputs.team_name }}\"
-                  },
-                  \"relations\": {}
-                }"
-                    - name: Register Entity in Port
-                      run: |
-                        curl -X POST https://api.getport.io/v1/blueprints/service/entities
+          git commit -m "Populate template values" || exit 0
+
+          git push
+
+      - name: Create Port Entity
+        env:
+          PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
+          PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
+        run: |
+          ACCESS_TOKEN=$(curl -s \
+            --location \
+            --request POST \
+            "https://api.port.io/v1/auth/access_token" \
+            --header "Content-Type: application/json" \
+            --data-raw "{
+              \"clientId\": \"$PORT_CLIENT_ID\",
+              \"clientSecret\": \"$PORT_CLIENT_SECRET\"
+            }" | jq -r '.accessToken')
+
+          curl --location \
+            --request POST \
+            "https://api.port.io/v1/blueprints/service_1/entities?upsert=true" \
+            --header "Authorization: Bearer $ACCESS_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data-raw "{
+              \"identifier\": \"${{ github.event.inputs.service_name }}\",
+              \"title\": \"${{ github.event.inputs.service_name }}\",
+              \"properties\": {
+                \"service_name\": \"${{ github.event.inputs.service_name }}\",
+                \"description\": \"${{ github.event.inputs.description }}\",
+                \"team_name\": \"${{ github.event.inputs.team_name }}\"
+              },
+              \"relations\": {}
+            }"
