@@ -1,38 +1,47 @@
-name: Deploy Status Page
+name: Deploy Service
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Build and Test"]
+    types:
+      - completed
 
 permissions:
-  contents: read
   pages: write
   id-token: write
+  contents: read
 
 jobs:
   deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+
     runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create status page
+      - name: Create Status Page
         run: |
           mkdir site
 
-          cat > site/index.html <<EOF
+          cat > site/index.html << EOF
           <html>
           <body>
-          <h1>customer-api-8</h1>
-          <p>Status: Running</p>
-          <p>Provisioned from Port.io</p>
+              <h1>Service Running</h1>
+              <p>Repository: ${{ github.repository }}</p>
+              <p>Status: Running</p>
+              <p>Created from Port</p>
           </body>
           </html>
           EOF
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-      - uses: actions/deploy-pages@v4
+      - name: Deploy Pages
+        uses: actions/deploy-pages@v4
