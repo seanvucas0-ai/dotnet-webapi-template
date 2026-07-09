@@ -23,3 +23,16 @@ jobs:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
+
+      - name: Health Check
+        run: |
+          sleep 30
+
+          curl --fail \
+          https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net/health
+
+
+      - name: Validate Sample API
+        run: |
+          curl --fail \
+          https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net/api/sample
