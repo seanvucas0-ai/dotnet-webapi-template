@@ -55,6 +55,10 @@ jobs:
           ## Team
 
           Owned by ${{ github.event.inputs.team_name }}
+
+          ## Status
+
+          Provisioning
           EOF
 
       - name: Replace appsettings values
@@ -78,6 +82,9 @@ jobs:
           PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
           PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
         run: |
+
+          echo "Requesting Port access token..."
+
           ACCESS_TOKEN=$(curl -s \
             --location \
             --request POST \
@@ -88,7 +95,14 @@ jobs:
               \"clientSecret\": \"$PORT_CLIENT_SECRET\"
             }" | jq -r '.accessToken')
 
-          curl --location \
+          if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "null" ]; then
+            echo "Failed to obtain Port access token"
+            exit 1
+          fi
+
+          echo "Port authentication successful"
+
+          curl --fail --location \
             --request POST \
             "https://api.port.io/v1/blueprints/service_1/entities?upsert=true" \
             --header "Authorization: Bearer $ACCESS_TOKEN" \
@@ -99,7 +113,10 @@ jobs:
               \"properties\": {
                 \"service_name\": \"${{ github.event.inputs.service_name }}\",
                 \"description\": \"${{ github.event.inputs.description }}\",
-                \"team_name\": \"${{ github.event.inputs.team_name }}\"
+                \"team_name\": \"${{ github.event.inputs.team_name }}\",
+                \"deployment_status\": \"Provisioning\"
               },
               \"relations\": {}
             }"
+
+          echo "Port entity created successfully"
