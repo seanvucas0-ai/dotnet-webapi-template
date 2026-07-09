@@ -30,10 +30,9 @@ jobs:
           cat > site/index.html << EOF
           <html>
           <body>
-              <h1>Service Running</h1>
-              <p>Repository: ${{ github.repository }}</p>
-              <p>Status: Running</p>
-              <p>Created from Port</p>
+            <h1>${{ github.event.repository.name }}</h1>
+            <p>Status: Running</p>
+            <p>Created from Port.io</p>
           </body>
           </html>
           EOF
@@ -45,3 +44,8 @@ jobs:
 
       - name: Deploy Pages
         uses: actions/deploy-pages@v4
+
+      - name: Deployment Complete
+        run: |
+          echo "Service deployed"
+          echo "Status = Running"
