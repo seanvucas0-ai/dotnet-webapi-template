@@ -14,7 +14,7 @@ on:
         type: string
 
       team_name:
-        description: Owning team
+        description: Team name
         required: true
         type: string
 
@@ -53,12 +53,8 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
-
             const serviceName = '${{ github.event.inputs.service_name }}';
             const description = '${{ github.event.inputs.description }}';
-
-            console.log(`Service Name: ${serviceName}`);
-            console.log(`Description: ${description}`);
 
             try {
               await github.rest.repos.get({
@@ -68,12 +64,9 @@ jobs:
 
               throw new Error(`Repository '${serviceName}' already exists`);
             } catch (err) {
-
               if (err.status !== 404) {
                 throw err;
               }
-
-              console.log("Repository does not exist. Creating...");
             }
 
             const repo = await github.rest.repos.createUsingTemplate({
@@ -135,23 +128,31 @@ jobs:
 
           echo "Requesting Port access token..."
 
-          RESPONSE=$(curl -s \
+          echo "Client ID length: ${#PORT_CLIENT_ID}"
+          echo "Client Secret length: ${#PORT_CLIENT_SECRET}"
+
+          RESPONSE=$(jq -n \
+            --arg clientId "$PORT_CLIENT_ID" \
+            --arg clientSecret "$PORT_CLIENT_SECRET" \
+            '{
+              clientId: $clientId,
+              clientSecret: $clientSecret
+            }')
+
+          TOKEN_RESPONSE=$(curl -s \
             --location \
             --request POST \
             "https://api.port.io/v1/auth/access_token" \
             --header "Content-Type: application/json" \
-            --data-raw "{
-              \"clientId\":\"$PORT_CLIENT_ID\",
-              \"clientSecret\":\"$PORT_CLIENT_SECRET\"
-            }")
+            --data "$RESPONSE")
 
           echo "Port response received"
 
-          ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.accessToken')
+          ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.accessToken')
 
           if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "null" ]; then
             echo "Failed to obtain Port access token"
-            echo "$RESPONSE"
+            echo "$TOKEN_RESPONSE"
             exit 1
           fi
 
@@ -164,15 +165,15 @@ jobs:
             --header "Authorization: Bearer $ACCESS_TOKEN" \
             --header "Content-Type: application/json" \
             --data-raw "{
-              \"identifier\":\"${{ github.event.inputs.service_name }}\",
-              \"title\":\"${{ github.event.inputs.service_name }}\",
-              \"properties\":{
-                \"service_name\":\"${{ github.event.inputs.service_name }}\",
-                \"description\":\"${{ github.event.inputs.description }}\",
-                \"team_name\":\"${{ github.event.inputs.team_name }}\",
-                \"deployment_status\":\"Provisioning\"
+              \"identifier\": \"${{ github.event.inputs.service_name }}\",
+              \"title\": \"${{ github.event.inputs.service_name }}\",
+              \"properties\": {
+                \"service_name\": \"${{ github.event.inputs.service_name }}\",
+                \"description\": \"${{ github.event.inputs.description }}\",
+                \"team_name\": \"${{ github.event.inputs.team_name }}\",
+                \"deployment_status\": \"Provisioning\"
               },
-              \"relations\":{}
+              \"relations\": {}
             }"
 
           echo "Port entity created successfully"
