@@ -4,17 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       service_name:
-        description: Service name
         required: true
         type: string
 
       description:
-        description: Service description
         required: true
         type: string
 
       team_name:
-        description: Team name
         required: true
         type: string
 
@@ -23,58 +20,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Debug Inputs
-        run: |
-          echo "service_name='${{ github.event.inputs.service_name }}'"
-          echo "description='${{ github.event.inputs.description }}'"
-          echo "team_name='${{ github.event.inputs.team_name }}'"
-
-      - name: Validate Inputs
-        run: |
-          if [ -z "${{ github.event.inputs.service_name }}" ]; then
-            echo "service_name is empty"
-            exit 1
-          fi
-
-          if [ -z "${{ github.event.inputs.description }}" ]; then
-            echo "description is empty"
-            exit 1
-          fi
-
-          if [ -z "${{ github.event.inputs.team_name }}" ]; then
-            echo "team_name is empty"
-            exit 1
-          fi
-
       - name: Create repository from template
         id: create_repo
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
-            const serviceName = '${{ github.event.inputs.service_name }}';
-            const description = '${{ github.event.inputs.description }}';
-
-            try {
-              await github.rest.repos.get({
-                owner: 'seanvucas0-ai',
-                repo: serviceName
-              });
-
-              throw new Error(`Repository '${serviceName}' already exists`);
-            } catch (err) {
-              if (err.status !== 404) {
-                throw err;
-              }
-            }
-
             const repo = await github.rest.repos.createUsingTemplate({
               template_owner: 'seanvucas0-ai',
               template_repo: 'dotnet-webapi-template',
               owner: 'seanvucas0-ai',
-              name: serviceName,
-              description: description,
+              name: '${{ github.event.inputs.service_name }}',
+              description: '${{ github.event.inputs.description }}',
               private: true
             });
 
@@ -98,10 +55,6 @@ jobs:
           ## Team
 
           Owned by ${{ github.event.inputs.team_name }}
-
-          ## Status
-
-          Provisioning
           EOF
 
       - name: Replace appsettings values
@@ -116,7 +69,7 @@ jobs:
 
           git add README.md appsettings.json
 
-          git commit -m "Populate template values" || true
+          git commit -m "Populate template values" || exit 0
 
           git push
 
@@ -125,41 +78,17 @@ jobs:
           PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
           PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
         run: |
-
-          echo "Requesting Port access token..."
-
-          echo "Client ID length: ${#PORT_CLIENT_ID}"
-          echo "Client Secret length: ${#PORT_CLIENT_SECRET}"
-
-          RESPONSE=$(jq -n \
-            --arg clientId "$PORT_CLIENT_ID" \
-            --arg clientSecret "$PORT_CLIENT_SECRET" \
-            '{
-              clientId: $clientId,
-              clientSecret: $clientSecret
-            }')
-
-          TOKEN_RESPONSE=$(curl -s \
+          ACCESS_TOKEN=$(curl -s \
             --location \
             --request POST \
             "https://api.port.io/v1/auth/access_token" \
             --header "Content-Type: application/json" \
-            --data "$RESPONSE")
+            --data-raw "{
+              \"clientId\": \"$PORT_CLIENT_ID\",
+              \"clientSecret\": \"$PORT_CLIENT_SECRET\"
+            }" | jq -r '.accessToken')
 
-          echo "Port response received"
-
-          ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.accessToken')
-
-          if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "null" ]; then
-            echo "Failed to obtain Port access token"
-            echo "$TOKEN_RESPONSE"
-            exit 1
-          fi
-
-          echo "Port authentication successful"
-
-          curl --fail \
-            --location \
+          curl --location \
             --request POST \
             "https://api.port.io/v1/blueprints/service_1/entities?upsert=true" \
             --header "Authorization: Bearer $ACCESS_TOKEN" \
@@ -170,10 +99,7 @@ jobs:
               \"properties\": {
                 \"service_name\": \"${{ github.event.inputs.service_name }}\",
                 \"description\": \"${{ github.event.inputs.description }}\",
-                \"team_name\": \"${{ github.event.inputs.team_name }}\",
-                \"deployment_status\": \"Provisioning\"
+                \"team_name\": \"${{ github.event.inputs.team_name }}\"
               },
               \"relations\": {}
             }"
-
-          echo "Port entity created successfully"
